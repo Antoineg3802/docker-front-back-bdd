@@ -1,9 +1,8 @@
-version: '3'
 services:
   backend:
     build: ./backend
     ports:
-      - "9000:9000"
+      - "8000:8000"
     environment:
       - APP_ENV=prod
       - DATABASE_URL=postgresql://user:password@db:5432/mydb
