@@ -13,13 +13,17 @@ services:
       - APP_ENV=dev
     depends_on:
       - db
+    networks:
+      - network_docker
 
   frontend:
     build: ./frontend
     ports:
-      - "3000:3000"
+      - "8080:8080"
     depends_on:
       - backend
+    networks:
+      - network_docker
 
   db:
     image: mysql:8.0
@@ -29,6 +33,12 @@ services:
       MYSQL_DATABASE: symfony
     ports:
       - "3306:3306"
+    networks:
+      - network_docker
 
 volumes:
   vendor_data:
+
+networks:
+  network_docker:
+    driver: bridge
