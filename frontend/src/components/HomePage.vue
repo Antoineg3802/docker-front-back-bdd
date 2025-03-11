@@ -3,19 +3,27 @@
     <!-- En-tête -->
     <header class="bg-white shadow">
       <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-        <h1 class="text-xl font-bold text-gray-800">Nom du Site</h1>
-        <nav class="space-x-4">
-          <button
-            @click="goTo('login')"
-            class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        <h1 class="text-xl font-bold text-gray-800">Testtttt</h1>
+        <nav class="space-x-4" v-if="!isAuthenticated">
+          <a
+            href="/login"
+            class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 hover:cursor-pointer"
           >
             Connexion
-          </button>
-          <button
-            @click="goTo('register')"
-            class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+          </a>
+          <a
+            href="/register"
+            class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 hover:cursor-pointer"
           >
             Inscription
+          </a>
+        </nav>
+        <nav class="space-x-4" v-else>
+          <button
+            @click="removeToken"
+            class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+          >
+            Déconnexion
           </button>
         </nav>
       </div>
@@ -59,63 +67,82 @@
 
     <!-- Pied de page -->
     <footer class="bg-gray-100 py-4 mt-12">
-      <div class="container mx-auto px-4 text-center text-gray-600">
-        © 2025 INSTAAAGRAM.
-      </div>
+      <div class="container mx-auto px-4 text-center text-gray-600">© 2025 INSTAAAGRAM.</div>
     </footer>
   </div>
 </template>
 
-<script>
-export default {
-  name: 'LandingPage',
-  data() {
-    return {
-      images: [
-        {
-          id: 1,
-          src: 'https://via.placeholder.com/400x300',
-          alt: 'Image 1',
-          likes: 0,
-          dislikes: 0,
-        },
-        {
-          id: 2,
-          src: 'https://via.placeholder.com/400x300',
-          alt: 'Image 2',
-          likes: 0,
-          dislikes: 0,
-        },
-        {
-          id: 3,
-          src: 'https://via.placeholder.com/400x300',
-          alt: 'Image 3',
-          likes: 0,
-          dislikes: 0,
-        },
-      ],
-    }
+<script setup lang="ts">
+import { onMounted, ref } from 'vue'
+
+import { useAuth,  } from '@/composables/useAuth';
+
+const { isAuthenticated, removeToken } = useAuth();
+
+console.log(isAuthenticated)
+
+
+onMounted(() => {
+  const apiUrl = import.meta.env.VITE_API_URL
+  console.log(apiUrl + 'api/')
+  fetch(apiUrl + 'api/')
+    .then((response) => response.json())
+    .then((data) => {
+      console.log(data)
+    })
+})
+
+interface Image {
+  id: number
+  src: string
+  alt: string
+  likes: number
+  dislikes: number
+}
+
+const images = ref<Image[]>([
+  {
+    id: 1,
+    src: 'https://via.placeholder.com/400x300',
+    alt: 'Image 1',
+    likes: 0,
+    dislikes: 0,
   },
-  methods: {
-    goTo(page) {
-      // Simuler une navigation vers la page 'login' ou 'register'
-      alert(`Navigation vers la page ${page}`)
-    },
-    likeImage(id) {
-      const image = this.images.find((img) => img.id === id)
-      if (image) {
-        image.likes++
-        // Ajouter ici la logique pour stocker cette interaction de manière persistante
-      }
-    },
-    dislikeImage(id) {
-      const image = this.images.find((img) => img.id === id)
-      if (image) {
-        image.dislikes++
-        // Ajouter ici la logique pour stocker cette interaction de manière persistante
-      }
-    },
+  {
+    id: 2,
+    src: 'https://via.placeholder.com/400x300',
+    alt: 'Image 2',
+    likes: 0,
+    dislikes: 0,
   },
+  {
+    id: 3,
+    src: 'https://via.placeholder.com/400x300',
+    alt: 'Image 3',
+    likes: 0,
+    dislikes: 0,
+  },
+])
+
+function goTo(page: string): void {
+  // Simuler une navigation vers la page 'login' ou 'register'
+  alert(`Navigation vers la page ${page}`)
+}
+
+function likeImage(id: number): void {
+  const image = images.value.find((img) => img.id === id)
+  if (image) {
+    image.likes++
+    // Ajouter ici la logique pour stocker cette interaction de manière persistante
+  }
+}
+
+function dislikeImage(id: number): void {
+  const image = images.value.find((img) => img.id === id)
+  if (image) {
+    image.dislikes++
+    // Ajouter ici la logique pour stocker cette interaction de manière persistante
+  }
 }
 </script>
 
