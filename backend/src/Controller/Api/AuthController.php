@@ -22,6 +22,12 @@ class AuthController extends AbstractController
             return new JsonResponse(['error' => 'Données incomplètes'], 400);
         }
 
+        // Vérifier que l'utilisateur n'existe pas déjà (email ou nom d'utilisateur)
+        $existingUser = $em->getRepository(User::class)->findOneBy(['email' => $data['email']]);
+        if ($existingUser) {
+            return new JsonResponse(['error' => 'Ce nom d\'utilisateur est déjà pris'], 400);
+        }
+
         // Création de l'utilisateur
         $user = new User();
         $user->setUsername($data['username']);

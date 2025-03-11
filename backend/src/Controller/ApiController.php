@@ -20,7 +20,7 @@ class ApiController extends AbstractController
         return new Response('Liste des utilisateurs', Response::HTTP_OK);
     }
 
-    #[Route('/api/login', name: 'api_users', methods: ['GET'])]
+    #[Route('/api/login', name: 'api_login', methods: ['POST'])]
     public function login(Request $request): Response
     {
         return new Response('Login', Response::HTTP_OK);
