@@ -1,5 +1,5 @@
 # Utiliser une image PHP compatible, ici PHP 8.1 avec FPM
-FROM php:8.1-fpm
+FROM php:8.2-fpm
 
 # Installer les dépendances système nécessaires
 RUN apt-get update && apt-get install -y \
@@ -9,6 +9,8 @@ RUN apt-get update && apt-get install -y \
     zip \
     unzip \
     && docker-php-ext-install pdo pdo_mysql
+
+RUN apt-get update && apt-get install -y netcat-openbsd
 
 # Installer Composer depuis une image officielle
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
@@ -30,5 +32,6 @@ COPY . .
 # Exposer le port (celui-ci doit correspondre à celui utilisé par Symfony, ici 8000 par exemple)
 EXPOSE 8000
 
-# Commande par défaut pour démarrer le serveur Symfony en mode dev
+ENTRYPOINT [ "/var/www/entrypoint.sh" ]
+
 CMD ["symfony", "serve", "--allow-all-ip", "--no-tls", "--port=8000"]

@@ -1,0 +1,33 @@
+# config/packages/security.yaml
+security:
+    password_hashers:
+        App\Entity\User:
+            algorithm: auto
+
+    providers:
+        app_user_provider:
+            entity:
+                class: App\Entity\User
+                property: email
+
+    firewalls:
+        # Endpoint pour la connexion (login)
+        login:
+            pattern: ^/api/login
+            stateless: true
+            json_login:
+                check_path: /api/login
+                username_path: email
+                password_path: password
+
+        # Pour toutes les autres routes de l'API
+        api:
+            pattern: ^/(?!api/register).*
+            stateless: true
+            # Si vous utilisez JWT, vous ajouterez la configuration suivante
+            jwt: ~
+
+    access_control:
+        - { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/api/register, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
