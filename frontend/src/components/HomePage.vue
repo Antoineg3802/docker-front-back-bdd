@@ -140,10 +140,14 @@ function closeForm() {
 }
 
 async function handleLike(imageId: number) {
-    let image = allImages.value.find((img) => img.id === imageId)
-    if (!image) {
-      image = userImages.value.find((img) => img.id === imageId)
-    }
+  let image;
+  if (allImages.value){
+    image = allImages.value.find((img) => img.id === imageId)
+  }else if (userImages.value){
+    image = userImages.value.find((img) => img.id === imageId)
+  }else{
+    return
+  }
   
     if (image && image.canUserLike) {
       image.likes += 1
@@ -177,10 +181,14 @@ async function handleLike(imageId: number) {
 }
 
 async function handleDislike(imageId: number) {
-    let image = allImages.value.find((img) => img.id === imageId)
-    if (!image) {
-      image = userImages.value.find((img) => img.id === imageId)
-    }
+  let image;
+  if (allImages.value){
+    image = allImages.value.find((img) => img.id === imageId)
+  }else if (userImages.value){
+    image = userImages.value.find((img) => img.id === imageId)
+  }else{
+    return
+  }
   
     if (image && image.canUserDislike) {
       image.dislikes += 1
