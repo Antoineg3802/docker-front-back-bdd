@@ -94,7 +94,6 @@ async function handleSubmit() {
     .then((response) => response.json())
     .then((data) => {
       if (data.error) {
-        console.error(data.error)
         alert("Erreur lors de l'ajout de l'image")
         return
       }
