@@ -30,7 +30,7 @@ RUN curl -sS https://get.symfony.com/cli/installer | bash && \
 COPY . .
 
 # Exposer le port (celui-ci doit correspondre à celui utilisé par Symfony, ici 8000 par exemple)
-EXPOSE 8000
+EXPOSE ${APP_PORT}
 
 ENTRYPOINT [ "/var/www/entrypoint.sh" ]
 
