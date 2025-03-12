@@ -19,6 +19,7 @@
                 autocomplete="email"
                 class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                 v-model="email"
+                required
               />
             </div>
           </div>
@@ -35,6 +36,7 @@
                 autocomplete="username"
                 class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                 v-model="username"
+                required
               />
             </div>
           </div>
@@ -51,6 +53,7 @@
                 autocomplete="current-password"
                 class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                 v-model="password"
+                required
               />
             </div>
           </div>
@@ -94,7 +97,7 @@ function handleSubmit() {
   .then((response) => response.json())
   .then((data)=>{
     if (!data.error){
-      window.location.href = '/login?register=true'
+      window.location.href = '/login'
     } else {
       alert('Error creating user')
     }
