@@ -5,7 +5,7 @@ interface JwtPayload {
   exp: number
 }
 
-const token = ref<string | null>(localStorage.getItem('jwtToken'))
+export const token = ref<string | null>(localStorage.getItem('jwtToken'))
 
 export function setToken(newToken: string) {
   token.value = newToken

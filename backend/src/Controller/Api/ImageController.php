@@ -53,7 +53,7 @@ class ImageController extends AbstractController
      *
      * On attend un champ "title" et un fichier "image" dans la requête.
      */
-    #[Route('/api/photos', name: 'api_photo_add', methods: ['POST'])]
+    #[Route('/api/image', name: 'api_image_add', methods: ['POST'])]
     public function addPhoto(Request $request, EntityManagerInterface $em): JsonResponse
     {
         // Récupérer les données du formulaire
@@ -67,15 +67,17 @@ class ImageController extends AbstractController
         // Lire le contenu du fichier (pour le stocker en BLOB ou en base64)
         $imageContent = file_get_contents($file->getPathname());
 
-        $photo = new Image();
-        $photo->setImageData($imageContent);
+        $image = new Image();
+        $image->setImageData($imageContent);
+        $image->setUser($this->getUser());
 
-        $em->persist($photo);
+
+        $em->persist($image);
         $em->flush();
 
         return new JsonResponse([
-            'message' => 'Photo ajoutée',
-            'id' => $photo->getId(),
+            'message' => 'Image ajoutée',
+            'id' => $image->getId(),
         ], Response::HTTP_CREATED);
     }
 
