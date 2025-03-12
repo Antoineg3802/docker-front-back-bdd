@@ -140,8 +140,6 @@ function closeForm() {
 }
 
 async function handleLike(imageId: number) {
-  if (allImages.value && userImages.value){
-
     let image = allImages.value.find((img) => img.id === imageId)
     if (!image) {
       image = userImages.value.find((img) => img.id === imageId)
@@ -176,11 +174,9 @@ async function handleLike(imageId: number) {
         }),
       })
     }
-  }
 }
 
 async function handleDislike(imageId: number) {
-  if (allImages.value && userImages.value){
     let image = allImages.value.find((img) => img.id === imageId)
     if (!image) {
       image = userImages.value.find((img) => img.id === imageId)
@@ -215,6 +211,5 @@ async function handleDislike(imageId: number) {
         }),
       })
     }
-  }
 }
 </script>
