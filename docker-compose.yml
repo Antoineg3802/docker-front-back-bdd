@@ -25,7 +25,7 @@ services:
       - "8080:8080"
     volumes:
       - ./frontend:/app
-      - /app/node_modules
+      - node_modules_data:/app/node_modules
     working_dir: /app
     command: npm run dev
     depends_on:
@@ -41,6 +41,8 @@ services:
       MYSQL_DATABASE: symfony
     ports:
       - "3306:3306"
+    volumes:
+    - db_data:/var/lib/mysql
     networks:
       - network_docker
   
@@ -59,6 +61,8 @@ services:
 
 volumes:
   vendor_data:
+  node_modules_data:
+  db_data:
 
 networks:
   network_docker:
