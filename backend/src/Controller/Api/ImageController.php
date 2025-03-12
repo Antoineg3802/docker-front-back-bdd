@@ -3,6 +3,7 @@
 
 namespace App\Controller\Api;
 
+use App\Entity\Dislike;
 use App\Entity\Image;
 use App\Entity\Photo;
 use App\Entity\Likes;
@@ -20,7 +21,7 @@ class ImageController extends AbstractController
      *
      * @param Photo $photo L'entité photo récupérée automatiquement via le paramConverter (paramètre {id})
      */
-    #[Route('/api/photos/{id}/like', name: 'api_photo_like', methods: ['POST'])]
+    #[Route('/api/image/{id}/like', name: 'api_photo_like', methods: ['POST'])]
     public function addLike(Image $image, EntityManagerInterface $em): JsonResponse
     {
         // Récupérer l'utilisateur connecté
@@ -46,6 +47,92 @@ class ImageController extends AbstractController
         $em->flush();
 
         return new JsonResponse(['message' => 'Like ajouté'], Response::HTTP_CREATED);
+    }
+
+    /**
+     * Ajoute un dislike à une photo.
+     *
+     * @param Photo $photo L'entité photo récupérée automatiquement via le paramConverter (paramètre {id})
+     */
+    #[Route('/api/image/{id}/dislike', name: 'api_photo_dislike', methods: ['POST'])]
+    public function addDislike(Image $image, EntityManagerInterface $em): JsonResponse
+    {
+        // Récupérer l'utilisateur connecté
+        $user = $this->getUser();
+        if (!$user) {
+            return new JsonResponse(['error' => 'Non autorisé'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        // Vérifier si le like existe déjà (pour éviter les doublons)
+        $existingDisLike = $em->getRepository(Dislike::class)->findOneBy([
+            'user' => $user,
+            'image' => $image,
+        ]);
+        if ($existingDisLike) {
+            return new JsonResponse(['error' => 'Vous avez déjà disliké cette photo'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $dislike = new Dislike();
+        $dislike->setUser($user);
+        $dislike->setImage($image);
+
+        $em->persist($dislike);
+        $em->flush();
+
+        return new JsonResponse(['message' => 'Dislike ajouté'], Response::HTTP_CREATED);
+    }
+
+    #[Route('/api/image/{id}/unlike', name: 'api_photo_unlike', methods: ['POST'])]
+    public function removeLike(Image $image, EntityManagerInterface $em): JsonResponse
+    {
+        // Récupérer l'utilisateur connecté
+        $user = $this->getUser();
+        if (!$user) {
+            return new JsonResponse(['error' => 'Non autorisé'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        // Vérifier si le like existe déjà (pour éviter les doublons)
+        $existingLike = $em->getRepository(Likes::class)->findOneBy([
+            'user' => $user,
+            'image' => $image,
+        ]);
+        if (!$existingLike) {
+            return new JsonResponse(['error' => 'Vous n\'avez pas liké cette photo'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $em->remove($existingLike);
+        $em->flush();
+
+        return new JsonResponse(['message' => 'Like supprimé'], Response::HTTP_OK);
+    }
+
+    /**
+     * Supprime un like d'une photo.
+     *
+     * @param Photo $photo L'entité photo récupérée automatiquement via le paramConverter (paramètre {id})
+     */
+    #[Route('/api/image/{id}/undislike', name: 'api_photo_undislike', methods: ['POST'])]
+    public function removeDislike(Image $image, EntityManagerInterface $em): JsonResponse
+    {
+        // Récupérer l'utilisateur connecté
+        $user = $this->getUser();
+        if (!$user) {
+            return new JsonResponse(['error' => 'Non autorisé'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        // Vérifier si le like existe déjà (pour éviter les doublons)
+        $existingDisLike = $em->getRepository(Dislike::class)->findOneBy([
+            'user' => $user,
+            'image' => $image,
+        ]);
+        if (!$existingDisLike) {
+            return new JsonResponse(['error' => 'Vous n\'avez pas disliké cette photo'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $em->remove($existingDisLike);
+        $em->flush();
+
+        return new JsonResponse(['message' => 'Dislike supprimé'], Response::HTTP_OK);
     }
 
     /**
@@ -97,35 +184,49 @@ class ImageController extends AbstractController
         return new JsonResponse(['message' => 'Image supprimée'], Response::HTTP_OK);
     }
 
-    #[Route('/api/image', name: 'api_photo_get', methods: ['GET'])]
-    public function getPhotos(EntityManagerInterface $em): JsonResponse
-    {
-        $images = $em->getRepository(Image::class)->findBy(['user' => $this->getUser()]);
-
-        $data = [];
-        foreach ($images as $image) {
-            $data[] = [
-                'id' => $image->getId(),
-                'user' => $image->getUser()->getUsername(),
-                'imageData' => base64_encode(stream_get_contents($image->getImageData())),
-            ];
-        }
-
-        return new JsonResponse($data, Response::HTTP_OK);
-    }
-
-    #[Route('/api/image/all', name: 'api_all_photo_get', methods: ['GET'])]
+    #[Route('/api/image', name: 'api_all_photo_get', methods: ['GET'])]
     public function getAllPhotos(EntityManagerInterface $em): JsonResponse
     {
-        $images = $em->getRepository(Image::class)->findBy(['user' => !$this->getUser()]);
+        $images = $em->getRepository(Image::class)->findAll();
 
         $data = [];
         foreach ($images as $image) {
-            $data[] = [
-                'id' => $image->getId(),
-                'user' => $image->getUser()->getUsername(),
-                'imageData' => base64_encode(stream_get_contents($image->getImageData())),
-            ];
+            if ($this->getUser() && $image->getUser() === $this->getUser()) {
+                $data['userImages'][] = [
+                    'id' => $image->getId(),
+                    'imageData' => base64_encode(stream_get_contents($image->getImageData())),
+                    'likes' => count($image->getLikes()),
+                    'canUserLike' => $this->getUser() && !$em->getRepository(Likes::class)->findOneBy([
+                        'user' => $this->getUser(),
+                        'image' => $image,
+                    ]),
+                    "dislikes" => count($image->getDislikes()),
+                    'canUserDislike' => $this->getUser() && !$em->getRepository(Dislike::class)->findOneBy([
+                        'user' => $this->getUser(),
+                        'image' => $image,
+                    ]),
+                ];
+            } else {
+                $data['allImages'][] = [
+                    'id' => $image->getId(),
+                    'imageData' => base64_encode(stream_get_contents($image->getImageData())),
+                    'likes' => count($image->getLikes()),
+                    'canUserLike' => $this->getUser() && !$em->getRepository(Likes::class)->findOneBy([
+                        'user' => $this->getUser(),
+                        'image' => $image,
+                    ]),
+                    "dislikes" => count($image->getDislikes()),
+                    'canUserDislike' => $this->getUser() && !$em->getRepository(Dislike::class)->findOneBy([
+                        'user' => $this->getUser(),
+                        'image' => $image,
+                    ]),
+                ];
+
+                // sort by likes 
+                usort($data['allImages'], function ($a, $b) {
+                    return $b['likes'] <=> $a['likes'];
+                });
+            }
         }
 
         return new JsonResponse($data, Response::HTTP_OK);

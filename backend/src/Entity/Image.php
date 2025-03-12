@@ -28,9 +28,16 @@ class Image
     #[ORM\OneToMany(targetEntity: Likes::class, mappedBy: 'image')]
     private Collection $likes;
 
+    /**
+     * @var Collection<int, Dislike>
+     */
+    #[ORM\OneToMany(targetEntity: Dislike::class, mappedBy: 'image')]
+    private Collection $dislikes;
+
     public function __construct()
     {
         $this->likes = new ArrayCollection();
+        $this->dislikes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -86,6 +93,36 @@ class Image
             // set the owning side to null (unless already changed)
             if ($like->getImage() === $this) {
                 $like->setImage(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Dislike>
+     */
+    public function getDislikes(): Collection
+    {
+        return $this->dislikes;
+    }
+
+    public function addDislike(Dislike $dislike): static
+    {
+        if (!$this->dislikes->contains($dislike)) {
+            $this->dislikes->add($dislike);
+            $dislike->setImage($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDislike(Dislike $dislike): static
+    {
+        if ($this->dislikes->removeElement($dislike)) {
+            // set the owning side to null (unless already changed)
+            if ($dislike->getImage() === $this) {
+                $dislike->setImage(null);
             }
         }
 

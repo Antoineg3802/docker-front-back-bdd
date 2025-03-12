@@ -42,6 +42,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { token } from '@/composables/useAuth'
+import { apiUrl } from '@/composables/useApi'
 
 defineProps({
   visible: Boolean,
@@ -50,7 +51,6 @@ defineProps({
 const emit = defineEmits(['closeModale'])
 
 const file = ref<File | null>(null)
-const apiUrl = import.meta.env.VITE_API_URL
 
 function handleFileChange(event: Event) {
   const files = (event.target as HTMLInputElement).files

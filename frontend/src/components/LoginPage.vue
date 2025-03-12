@@ -59,8 +59,7 @@
 <script setup lang="ts">
 import { setToken } from '@/composables/useAuth'
 import { ref, watch } from 'vue'
-
-let apiUrl = import.meta.env.VITE_API_URL
+import { apiUrl } from '@/composables/useApi'
 
 const username = ref('')
 const password = ref('')

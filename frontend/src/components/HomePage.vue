@@ -51,21 +51,34 @@
         </button>
       </section>
 
-      <!-- Mes images -->
-      <section v-if="isAuthenticated">
-        <h3 class="text-2xl font-semibold text-gray-800 mb-6">Mes images</h3>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          <ImageComponent :images="userImages" class="bg-white rounded shadow overflow-hidden" />
-        </div>
-      </section>
+      <div v-if="isAuthenticated" class="flex flex-col gap-12">
+        <!-- Mes images -->
+        <section v-if="isAuthenticated">
+          <h3 class="text-2xl font-semibold text-gray-800 mb-6">Mes images</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            <ImageComponent :images="userImages" @like="handleLike" @dislike="handleDislike" />
+          </div>
+        </section>
 
-      <!-- Galerie d'images -->
-      <section>
-        <h3 class="text-2xl font-semibold text-gray-800 mb-6">Galerie d'images</h3>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          <ImageComponent :images="allImages" class="bg-white rounded shadow overflow-hidden" />
-        </div>
-      </section>
+        <!-- Galerie d'images -->
+        <section>
+          <h3 class="text-2xl font-semibold text-gray-800 mb-6">Images de la communauté</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            <ImageComponent :images="allImages" @like="handleLike" @dislike="handleDislike" />
+          </div>
+        </section>
+      </div>
+      <div
+        class="flex flex-col items-center p-6 border-[1px] border-red-900 bg-red-200 rounded-xl"
+        v-else
+      >
+        <p class="text-center text-red-600">Connectez-vous pour accéder à la plateforme.</p>
+        <a
+          class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 hover:cursor-pointer"
+          href="/login"
+          >Se connecter</a
+        >
+      </div>
     </main>
 
     <!-- Pied de page -->
@@ -81,8 +94,7 @@ import { ref } from 'vue'
 import { useAuth, token } from '@/composables/useAuth'
 import ImageUploaderForm from '@/components/ImageUploaderForm.vue'
 import ImageComponent from '@/components/ImageComponent.vue'
-
-const apiUrl = import.meta.env.VITE_API_URL as string
+import { apiUrl } from '@/composables/useApi'
 
 const { isAuthenticated, removeToken } = useAuth()
 const imageFormVisible = ref(false)
@@ -91,6 +103,10 @@ interface Image {
   id: number
   imageData: string
   user: string
+  likes: number
+  canUserLike: boolean
+  dislikes: number
+  canUserDislike: boolean
 }
 
 let userImages = ref<Image[]>([])
@@ -107,41 +123,10 @@ if (isAuthenticated) {
       if (data.error) {
         userImages.value = []
       } else {
-        userImages.value = data
-      }
-      console.log(data.error)
-      console.log(userImages)
-    })
-
-  fetch(apiUrl + 'image/all', {
-    headers: {
-      Authorization: `Bearer ${token.value}`,
-    },
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.error) {
-        allImages.value = []
-      } else {
-        allImages.value = data
+        userImages.value = data.userImages
+        allImages.value = data.allImages
       }
     })
-}
-
-function likeImage(id: number): void {
-  // const image = images.value.find((img) => img.id === id)
-  // if (image) {
-  //   image.likes++
-  //   // Ajouter ici la logique pour stocker cette interaction de manière persistante
-  // }
-}
-
-function dislikeImage(id: number): void {
-  // const image = images.value.find((img) => img.id === id)
-  // if (image) {
-  //   image.dislikes++
-  //   // Ajouter ici la logique pour stocker cette interaction de manière persistante
-  // }
 }
 
 function handleDisplayImageForm(): void {
@@ -151,8 +136,78 @@ function handleDisplayImageForm(): void {
 function closeForm() {
   imageFormVisible.value = false
 }
-</script>
 
-<style scoped>
-/* Ajoutez ici vos styles personnalisés si nécessaire */
-</style>
+async function handleLike(imageId: number) {
+  let image = allImages.value.find((img) => img.id === imageId)
+  if (!image) {
+    image = userImages.value.find((img) => img.id === imageId)
+  }
+
+  if (image && image.canUserLike) {
+    image.likes += 1
+    image.canUserLike = false
+
+    await fetch(apiUrl + 'image/' + imageId.toString() + '/like', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        imageId: imageId,
+      }),
+    })
+  }else if (image && !image.canUserLike){
+    image.likes -= 1
+    image.canUserLike = true
+
+    await fetch(apiUrl + 'image/' + imageId.toString() + '/unlike', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        imageId: imageId,
+      }),
+    })
+  }
+}
+
+async function handleDislike(imageId: number) {
+  let image = allImages.value.find((img) => img.id === imageId)
+  if (!image) {
+    image = userImages.value.find((img) => img.id === imageId)
+  }
+
+  if (image && image.canUserDislike) {
+    image.dislikes += 1
+    image.canUserDislike = false
+
+    await fetch(apiUrl + 'image/' + imageId.toString() + '/dislike', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        imageId: imageId,
+      }),
+    })
+  }else if (image && !image.canUserDislike){
+    image.dislikes -= 1
+    image.canUserDislike = true
+
+    await fetch(apiUrl + 'image/' + imageId.toString() + '/undislike', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        imageId: imageId,
+      }),
+    })
+  }
+}
+</script>

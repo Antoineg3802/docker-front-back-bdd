@@ -71,14 +71,13 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { apiUrl } from '@/composables/useApi'
 
 let email = ref('')
 let username = ref('')
 let password = ref('')
 
 function handleSubmit() {
-  let apiUrl = import.meta.env.VITE_API_URL
-
   let newUser = {
     email: email.value,
     username: username.value,
