@@ -22,8 +22,6 @@
 
 <script setup lang="ts">
 import { toRef } from 'vue'
-import { apiUrl } from '@/composables/useApi'
-import { token } from '@/composables/useAuth'
 
 interface Image {
   id: number
@@ -33,7 +31,7 @@ interface Image {
 }
 
 let props = defineProps<{
-  images: Image[] | []
+  images: Image[] | undefined
 }>()
 
 let images = toRef(props, 'images')

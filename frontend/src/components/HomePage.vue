@@ -57,6 +57,7 @@
           <h3 class="text-2xl font-semibold text-gray-800 mb-6">Mes images</h3>
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             <ImageComponent :images="userImages" @like="handleLike" @dislike="handleDislike" />
+            <p v-if="!userImages">Pas encore d'images...</p>
           </div>
         </section>
 
@@ -65,6 +66,7 @@
           <h3 class="text-2xl font-semibold text-gray-800 mb-6">Images de la communauté</h3>
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             <ImageComponent :images="allImages" @like="handleLike" @dislike="handleDislike" />
+            <p v-if="!allImages">Pas encore d'images...</p>
           </div>
         </section>
       </div>
@@ -109,8 +111,8 @@ interface Image {
   canUserDislike: boolean
 }
 
-let userImages = ref<Image[]>([])
-let allImages = ref<Image[]>([])
+let userImages = ref<Image[] | undefined>([])
+let allImages = ref<Image[] | undefined>([])
 
 if (isAuthenticated) {
   fetch(apiUrl + 'image', {
@@ -138,76 +140,81 @@ function closeForm() {
 }
 
 async function handleLike(imageId: number) {
-  let image = allImages.value.find((img) => img.id === imageId)
-  if (!image) {
-    image = userImages.value.find((img) => img.id === imageId)
-  }
+  if (allImages.value && userImages.value){
 
-  if (image && image.canUserLike) {
-    image.likes += 1
-    image.canUserLike = false
-
-    await fetch(apiUrl + 'image/' + imageId.toString() + '/like', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token.value}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        imageId: imageId,
-      }),
-    })
-  }else if (image && !image.canUserLike){
-    image.likes -= 1
-    image.canUserLike = true
-
-    await fetch(apiUrl + 'image/' + imageId.toString() + '/unlike', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token.value}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        imageId: imageId,
-      }),
-    })
+    let image = allImages.value.find((img) => img.id === imageId)
+    if (!image) {
+      image = userImages.value.find((img) => img.id === imageId)
+    }
+  
+    if (image && image.canUserLike) {
+      image.likes += 1
+      image.canUserLike = false
+  
+      await fetch(apiUrl + 'image/' + imageId.toString() + '/like', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token.value}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          imageId: imageId,
+        }),
+      })
+    }else if (image && !image.canUserLike){
+      image.likes -= 1
+      image.canUserLike = true
+  
+      await fetch(apiUrl + 'image/' + imageId.toString() + '/unlike', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token.value}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          imageId: imageId,
+        }),
+      })
+    }
   }
 }
 
 async function handleDislike(imageId: number) {
-  let image = allImages.value.find((img) => img.id === imageId)
-  if (!image) {
-    image = userImages.value.find((img) => img.id === imageId)
-  }
-
-  if (image && image.canUserDislike) {
-    image.dislikes += 1
-    image.canUserDislike = false
-
-    await fetch(apiUrl + 'image/' + imageId.toString() + '/dislike', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token.value}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        imageId: imageId,
-      }),
-    })
-  }else if (image && !image.canUserDislike){
-    image.dislikes -= 1
-    image.canUserDislike = true
-
-    await fetch(apiUrl + 'image/' + imageId.toString() + '/undislike', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token.value}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        imageId: imageId,
-      }),
-    })
+  if (allImages.value && userImages.value){
+    let image = allImages.value.find((img) => img.id === imageId)
+    if (!image) {
+      image = userImages.value.find((img) => img.id === imageId)
+    }
+  
+    if (image && image.canUserDislike) {
+      image.dislikes += 1
+      image.canUserDislike = false
+  
+      await fetch(apiUrl + 'image/' + imageId.toString() + '/dislike', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token.value}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          imageId: imageId,
+        }),
+      })
+    }else if (image && !image.canUserDislike){
+      image.dislikes -= 1
+      image.canUserDislike = true
+  
+      await fetch(apiUrl + 'image/' + imageId.toString() + '/undislike', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token.value}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          imageId: imageId,
+        }),
+      })
+    }
   }
 }
 </script>

@@ -83,6 +83,7 @@ async function handleSubmit() {
       }
       alert('Image ajoutée avec succès')
       emit('closeModale')
+      window.location.reload()
     })
 }
 </script>
