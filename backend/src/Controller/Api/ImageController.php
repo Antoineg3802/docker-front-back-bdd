@@ -57,10 +57,9 @@ class ImageController extends AbstractController
     public function addPhoto(Request $request, EntityManagerInterface $em): JsonResponse
     {
         // Récupérer les données du formulaire
-        $title = $request->request->get('title');
         $file = $request->files->get('image');
 
-        if (!$title || !$file) {
+        if (!$file) {
             return new JsonResponse(['error' => 'Données incomplètes (title et image requis)'], Response::HTTP_BAD_REQUEST);
         }
 
@@ -96,5 +95,39 @@ class ImageController extends AbstractController
         $em->flush();
 
         return new JsonResponse(['message' => 'Image supprimée'], Response::HTTP_OK);
+    }
+
+    #[Route('/api/image', name: 'api_photo_get', methods: ['GET'])]
+    public function getPhotos(EntityManagerInterface $em): JsonResponse
+    {
+        $images = $em->getRepository(Image::class)->findBy(['user' => $this->getUser()]);
+
+        $data = [];
+        foreach ($images as $image) {
+            $data[] = [
+                'id' => $image->getId(),
+                'user' => $image->getUser()->getUsername(),
+                'imageData' => base64_encode(stream_get_contents($image->getImageData())),
+            ];
+        }
+
+        return new JsonResponse($data, Response::HTTP_OK);
+    }
+
+    #[Route('/api/image/all', name: 'api_all_photo_get', methods: ['GET'])]
+    public function getAllPhotos(EntityManagerInterface $em): JsonResponse
+    {
+        $images = $em->getRepository(Image::class)->findBy(['user' => !$this->getUser()]);
+
+        $data = [];
+        foreach ($images as $image) {
+            $data[] = [
+                'id' => $image->getId(),
+                'user' => $image->getUser()->getUsername(),
+                'imageData' => base64_encode(stream_get_contents($image->getImageData())),
+            ];
+        }
+
+        return new JsonResponse($data, Response::HTTP_OK);
     }
 }
