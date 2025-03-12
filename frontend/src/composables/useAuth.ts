@@ -3,7 +3,6 @@ import { jwtDecode } from 'jwt-decode'
 
 interface JwtPayload {
   exp: number
-  // Ajoutez d'autres champs si nécessaire, par exemple "username", "roles", etc.
 }
 
 const token = ref<string | null>(localStorage.getItem('jwtToken'))

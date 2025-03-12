@@ -4,11 +4,13 @@
       <h2 class="mt-10 w-full text-center text-2xl/9 font-bold tracking-tight text-gray-900">
         Enregistez-vous !
       </h2>
-  
+
       <div class="mt-10 sm:mx-auto sm:w-full">
-        <form class="flex flex-col gap-4" action="#" method="POST">
+        <form class="flex flex-col gap-4" @submit.prevent="handleSubmit">
           <div>
-            <label for="email" class="block text-sm/6 font-medium text-gray-900">Adresse Email</label>
+            <label for="email" class="block text-sm/6 font-medium text-gray-900"
+              >Adresse Email</label
+            >
             <div class="mt-2">
               <input
                 type="email"
@@ -16,12 +18,15 @@
                 id="email"
                 autocomplete="email"
                 class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                v-model="email"
               />
             </div>
           </div>
 
           <div>
-            <label for="username" class="block text-sm/6 font-medium text-gray-900">Nom d'utilisateur</label>
+            <label for="username" class="block text-sm/6 font-medium text-gray-900"
+              >Nom d'utilisateur</label
+            >
             <div class="mt-2">
               <input
                 type="username"
@@ -29,12 +34,15 @@
                 id="username"
                 autocomplete="username"
                 class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                v-model="username"
               />
             </div>
           </div>
-  
+
           <div>
-            <label for="password" class="block text-sm/6 font-medium text-gray-900">Mot de passe</label>
+            <label for="password" class="block text-sm/6 font-medium text-gray-900"
+              >Mot de passe</label
+            >
             <div class="mt-2">
               <input
                 type="password"
@@ -42,10 +50,11 @@
                 id="password"
                 autocomplete="current-password"
                 class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                v-model="password"
               />
             </div>
           </div>
-  
+
           <div class>
             <button
               type="submit"
@@ -59,3 +68,37 @@
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+
+let email = ref('')
+let username = ref('')
+let password = ref('')
+
+function handleSubmit() {
+  let apiUrl = import.meta.env.VITE_API_URL
+
+  let newUser = {
+    email: email.value,
+    username: username.value,
+    password: password.value,
+  }
+
+  fetch(`${apiUrl}register`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(newUser),
+  })
+  .then((response) => response.json())
+  .then((data)=>{
+    if (!data.error){
+      window.location.href = '/login?register=true'
+    } else {
+      alert('Error creating user')
+    }
+  })
+}
+</script>

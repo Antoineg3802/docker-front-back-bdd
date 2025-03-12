@@ -1,0 +1,60 @@
+<!-- faire un form d'ajout d'image -->
+<template>
+  <div
+    v-if="visible"
+    class="absolute top-0 bottom-0 left-0 right-0 flex flex-col items-center justify-center w-full z-20"
+  >
+    <div class="bg-white p-8 rounded-lg shadow-lg opacity-100 relative">
+      <button class="absolute top-2 right-2 hover:cursor-pointer" @click="$emit('closeModale')">
+        ❌
+      </button>
+      <h1 class="text-2xl font-bold">Ajouter une image</h1>
+      <form class="flex flex-col mt-4 gap-4" @submit.prevent="handleSubmit">
+        <div>
+          <label for="file" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+            >Choisissez un fichier :</label
+          >
+          <input
+            id="file"
+            type="file"
+            accept="image/png, image/jpeg"
+            class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+            @change="handleFileChange"
+          />
+        </div>
+        <div class>
+          <button
+            type="submit"
+            class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          >
+            Ajouter
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+
+defineProps({
+  visible: Boolean,
+})
+
+const file = ref<File | null>(null)
+
+function handleFileChange(event: Event) {
+  const files = (event.target as HTMLInputElement).files
+  if (files) {
+    file.value = files[0]
+  }
+}
+
+async function handleSubmit() {
+  if (!file.value) {
+    alert('Veuillez choisir un fichier')
+    return
+  }
+}
+</script>

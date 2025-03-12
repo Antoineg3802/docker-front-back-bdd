@@ -41,8 +41,6 @@ class ImageController extends AbstractController
         $like = new Likes();
         $like->setUser($user);
         $like->setImage($image);
-        // Le constructeur de Like peut initialiser createdAt (ou le définir ici)
-        // $like->setCreatedAt(new \DateTimeImmutable());
 
         $em->persist($like);
         $em->flush();

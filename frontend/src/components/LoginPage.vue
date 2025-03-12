@@ -1,6 +1,9 @@
 <template>
   <div class="h-screen w-screen flex justify-center items-center">
     <div class="flex min-h-full w-1/2 flex-col justify-center align-middle px-6 py-12 lg:px-8">
+      <h2 v-if="$route.query.register" class="mt-10 w-full text-center text-2xl/9 font-bold tracking-tight text-gray-900">
+        Merci d'avoir créé un compte !
+      </h2>
       <h2 class="mt-10 w-full text-center text-2xl/9 font-bold tracking-tight text-gray-900">
         Connectez-vous !
       </h2>
@@ -79,7 +82,7 @@ const handleSubmit = () => {
     .then((data) => {
       if (data.token) {
         setToken(data.token)
-        window.location.href = '/'
+        window.location.href = '/?logged=true'
       }
     })
 }
