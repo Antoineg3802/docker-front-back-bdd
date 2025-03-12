@@ -20,5 +20,7 @@ php bin/console doctrine:migrations:migrate --no-interaction
 
 echo "Migrations terminées. Lancement de l'application..."
 
+php bin/console lexik:jwt:generate-keypair --skip-if-exists
+
 # Lancement de l'application avec la commande passée en argument
 exec "$@"
